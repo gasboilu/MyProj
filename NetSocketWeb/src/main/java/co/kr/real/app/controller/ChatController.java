@@ -8,6 +8,7 @@ public class ChatController {
 	
 	@RequestMapping(value="/hello")
 	public String helloSpringBoot() {
+		System.out.println("파일 테스트");
 		return "hello";
 	}
 }
