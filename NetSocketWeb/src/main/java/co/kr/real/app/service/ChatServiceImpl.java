@@ -49,7 +49,7 @@ public class ChatServiceImpl implements ChatService{
 		
 		//memberList정보가없음
 		for(Mng_RoomInfo room : roomList){
-			room.setUpd_date(getDateString(room.getUpd_date(),"yyyyMMddHHmm"));
+			room.setUpd_date(getChatShowDateString(room.getUpd_date(),"yyyyMMddHHmm"));
 		}
 		return roomList;
 	}
@@ -61,7 +61,13 @@ public class ChatServiceImpl implements ChatService{
 		System.out.println(roomId.length());
 		//신규
 		if(roomId.length() == 0) {
-			//채팅방 생성
+			//채팅방 생성 (mongo db에 room_info 데이터 등록)
+			String type = "ST";
+			String today = getDateString("yyyyMMdd");
+//			if()
+			String room_id = today + type + today.substring(2,4);
+			System.out.println(room_id);
+			
 			//접속한 자기 자신 정보값 등록
 			//대상 정보값들 등록
 		}else {
@@ -73,8 +79,13 @@ public class ChatServiceImpl implements ChatService{
 		
 		return mapData;
 	}
+	
+	public String getDateString(String parttern){
+		DateFormat dateFormat = new SimpleDateFormat(parttern);
+		return dateFormat.format(System.currentTimeMillis());
+	}
 
-	public String getDateString(String dateTime, String parttern) throws Exception{
+	public String getChatShowDateString(String dateTime, String parttern) throws Exception{
 		DateFormat dateFormat = new SimpleDateFormat(parttern);
 		Date date = dateFormat.parse(dateTime);
 		

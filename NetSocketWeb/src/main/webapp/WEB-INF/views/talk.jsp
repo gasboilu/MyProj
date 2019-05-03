@@ -14,89 +14,20 @@
     <script src="/js/webfont.js"></script>
     <script type="text/javascript" src="/js/jquery-3.3.1.js"></script>
 	<script type="text/javascript" src="/js/socket.io.js"></script>
+	<script type="text/javascript" src="/js/chat_cont.js"></script>
 	<script type="text/javascript">
-	 	var host = "localhost";
-	 	var port = "3000";
-	 	var socket;
-	 	var params = ${jsonParams};
-	 	$(function(){
-	 		console.log(params.user_id);
-	 		connectToServer();
-	 		//신규 -> 채팅방을 관리? 채팅방 ID가 필요
-	 		
-	 		  //1> 채팅방 만들기
-	 		  //2> 채팅방 입장
-	 		
-	 		//기존방
-	 		  //1> 채팅방 입장
-	 		
-    	});
-    	
-    	//서버에 연결하는 함수 정의
-     	function connectToServer(){
-     		
-     		var options = {"forceNew" : true};
-     		var url = "http://" + host + ":" + port;
-     		console.log("socket url : "+url);
-     		socket = io.connect(url,options);
-
-     		//1. socket network 접속 가능 여부 확인
-     		socket.on("connect", function(){
-     			println("웹 소켓 서버에 연결되었습니다. :" + url);
-     			println(socket.connected);
-     			//2. 채팅방 신규인지 아닌지 체크
-     			
-     			$.ajax({
-		        	type: "post",
-			 	    url: "/chat/talkProcessing",
-			 	    data: params,
-			 	    dataType: "json",
-			 	    success: function(data) {
-			 	    	console.log("ajax data result::"+data.result);
-			 	     },
-			 	    error: function() {
-			 	    	
-			 	    }
-			 	 });
-     			
-     			
-     			socket.on("message", function(message){
-     				console.log(JSON.stringify(message));
-     				
-     				println("<p>수신 메시지 :" + message.sender + ", " + message.recepient + ", " + message.command + ", "
-     						+ message.type + ", " + message.data + "</p>");
-     			});
-     			
-     			socket.on("response", function(response){
-     				console.log(JSON.stringify(response));
-     				println("응답 메시지를 받았습니다" + response.command + ", " + response.code + ", " + response.message);
-     			});
-     			
-     			
-     			socket.on("room", function(response){
-     				console.log(JSON.stringfy(response));
-     				println("<p>방 이벤트 :" + data.command + "</p>");
-     				println("<p>방 리스트를 받았습니다.</p>");
-     				if(data.command == "list"){
-     					var roomCount = data.rooms.length;
-     					$("#roomList").html("<p>방 리스트" + roomCount + "개</p>");
-     					for( var i=0; i<roomCount ; i++){
-     						$("#roomList").append("<p>방 #" + i + ":" + data.rooms[i].id + ", " + data.rooms[i].name + ", " + data.rooms[i].owner + "</p>");
-     					}
-     				}
-     				
-     			});
-     		});
-     		
-     		socket.on("disconnect", function(){
-     			println("웹 소켓 연결이 종료되었습니다.");
-     		});
-     	}
-    	
-    	function println(data){
-     		console.log(data);
-     		$("#result").append("<p>" + data + "</p>");
-     	}
+		var params = ${jsonParams};
+		$(function(){
+			connectToServer(params);
+			//신규 -> 채팅방을 관리? 채팅방 ID가 필요
+			
+			  //1> 채팅방 만들기
+			  //2> 채팅방 입장
+			
+			//기존방
+			  //1> 채팅방 입장
+				
+		});
 	</script>
 </head>
 

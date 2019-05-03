@@ -71,14 +71,12 @@ public class ChatController {
 	@RequestMapping(value="/talkProcessing")
 	@ResponseBody
 	public Map<String,Object> talkProcessing(@RequestParam Map<String,String> params) throws Exception{
-		Map<String,Object> map = new HashMap<String,Object>();
-//		Map<String,Object> map = chatService.talkRoomInInfo(params);
-		Gson gson = new Gson();
-		String strJson = gson.toJson(params, HashMap.class);
+		Map<String,Object> returnMap = new HashMap<String,Object>();
+		Map<String,Object> map = chatService.talkRoomInInfo(params);
 		
-		map.put("result", "success");
+		returnMap.put("result", "success");
 		
-		return map;
+		return returnMap;
 	}
 	
 }

@@ -1,6 +1,30 @@
+var host = "localhost";
+var port = "3000";
+var socket;
+
 var deviceCont = {
     init : function() {
-      
+    	var options = {"forceNew" : true};
+    	var url = "http://" + host + ":" + port;
+    	console.log("socket url : "+url);
+    	socket = io.connect(url,options);
+    	console.log(socket);
+    },
+    setRoomProcess : function(params){
+    	//2. 채팅방 신규인지 아닌지 체크
+		 $.ajax({
+			type : "post",
+			url : "/chat/talkProcessing",
+			data : params,
+			dataType : "json",
+			success : this.resultRoomProcess,
+			error : function() {
+				//나중에 통합으로 처리 변경
+			}
+		});
+    },
+    resultRoomProcess : function(data){
+    	console.log("ajax data result::" + data.result);
     },
     getDeviceCheck : function(){
 		var varUA = navigator.userAgent.toLowerCase(); //userAgent 값 얻기
@@ -28,90 +52,51 @@ var deviceCont = {
 	}
 }
 
-//교사 입장
-function targetChating(userId,userName,paId,paName){
-	var f = confirm(paName+" 부모님과 채팅을 하시겠습니까?");
-	if(f){
-		$("#user_id").val(userId);
-		$("#user_name").val(userName);
-		$("#target_id").val(paId);
-		$("#target_name").val(paName);
-		document.infomation.submit();
-	}
-}
+//서버에 연결하는 함수 정의
+function connectToServer(params){
+	deviceCont.init();
 
-//부모입장
-function resultTargetChat(userId,userName,paId,paName){
-	$("#parentId").val(paId);
-	$("#parentName").val(paName);
-	$("#ptargetId").val(userId);
-	$("#ptargetName").val(userName);
-	document.infomationP.submit();
-}
-
-$(document).ready(function(){
-	/* $("#searchName").on("keyup", function(){
-		var searchName =  $(this).val();
-	}); */
-	
-	$("#closeBack").on("click", function(){
-		var f = confirm("채팅창에서 나가시겠습니까?");
-		var deviceChk = deviceCont.getDeviceCheck();
-		if(f){
-			if(deviceChk == "android"){
-				window.conn.cancel();	
-			}else {
-				deviceCont.sendToApp("cancel");
-			}
-		}
-	});
-	
-	$("#searchBtn").on("click", function(){
-		var searchName =  $("#in_txt").val();
-		var stId = $("#st_id").val();
-		var method = "SEARCH_CHATLIST";
-		var dataObj = {
-				search_name : searchName,
-				st_id : stId
-		};
+	//1. socket network 접속 가능 여부 확인
+	socket.on("connect", function(){
+		println("웹 소켓 서버에 연결되었습니다. : " + " http://" + host + ":" + port);
+		println(socket.connected);
+		//접속성공시에 채팅방여부 확인 시작
+		deviceCont.setRoomProcess(params);
 		
-		$.ajax({
-        	type: "post",
-	 	    url: "/ajax.wjth?method="+method,
-	 	    data: dataObj,
-	 	    dataType: "json",
-	 	    success: function(data) {
-	 	    	var list = data.chatList;
-	 	    	console.log(list);
-	 	    	$(".list-wrap").children().remove();
-	 	    	if(list.length > 0){
-	 	    		for(var i=0; i<list.length ; i++){
-		 	    		var htmlStr = "<div class='list-item no1' ontouchstart='' onclick='targetChating(\""+list[i].st_id+"\",\""+list[i].st_name+"\",\""+list[i].pa_id+"\",\""+list[i].pa_name+"\")'>";
-		                htmlStr += "		<a href='#'>";
-		                htmlStr += "			<div class='visual'></div>";
-		                htmlStr += "			<div class='info'>";
-		                htmlStr += "				<div class='g-info'>";
-		                htmlStr += "					<span class='name'>" + list[i].pa_name + " 부모님</span>";
-		                htmlStr += "					<span class='child'>(" + list[i].ch_name + ")</span>";
-		                htmlStr += "				</div>";
-		                htmlStr += "				<div class='date'>";
-		                htmlStr += "					<span class='timestamp'>" + list[i].creDtime + "</span>";
-		                if(list[i].msgCount > 0){
-		                	htmlStr += "				<em class='ico new'></em>";	
-		                }
-		                htmlStr += "				</div>";
-		                htmlStr += " 			</div>";
-		                htmlStr += "		</a>";
-		                htmlStr += "	</div>";
-		                $(".list-wrap").append(htmlStr);
-		 	    	}
-	 	    	}else{
-	 	    		$(".list-wrap").append("<div class='list-item no1' ontouchstart=''><a href='#'>검색정보가 없습니다</a></div>");
-	 	    	}
-	 	     },
-	 	    error: function() {
-	 	    	
-	 	    }
-	 	 });
+		socket.on("message", function(message){
+			console.log(JSON.stringify(message));
+			
+			println("<p>수신 메시지 :" + message.sender + ", " + message.recepient + ", " + message.command + ", "
+					+ message.type + ", " + message.data + "</p>");
+		});
+		
+		socket.on("response", function(response){
+			console.log(JSON.stringify(response));
+			println("응답 메시지를 받았습니다" + response.command + ", " + response.code + ", " + response.message);
+		});
+		
+		
+		socket.on("room", function(response){
+			console.log(JSON.stringfy(response));
+			println("<p>방 이벤트 :" + data.command + "</p>");
+			println("<p>방 리스트를 받았습니다.</p>");
+			if(data.command == "list"){
+				var roomCount = data.rooms.length;
+				$("#roomList").html("<p>방 리스트" + roomCount + "개</p>");
+				for( var i=0; i<roomCount ; i++){
+					$("#roomList").append("<p>방 #" + i + ":" + data.rooms[i].id + ", " + data.rooms[i].name + ", " + data.rooms[i].owner + "</p>");
+				}
+			}
+			
+		});
 	});
-});
+	
+	socket.on("disconnect", function(){
+		println("웹 소켓 연결이 종료되었습니다.");
+	});
+}
+
+function println(data){
+	console.log(data);
+	$("#result").append("<p>" + data + "</p>");
+}
