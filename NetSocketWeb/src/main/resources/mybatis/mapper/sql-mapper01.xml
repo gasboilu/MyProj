@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.real.app.mapper.ChatMapper">
+
+	<select id="getTime" resultType="String">
+		SELECT NOW() time FROM DUAL
+	</select>
+	
+	
+	<select id="getChatList" parameterType="hashmap"	resultType="hashmap">
+		SELECT
+			ST.ST_ID,
+			ST.ST_NAME,
+			ST.ST_TYPE,
+			ST.ST_TYPENAME,
+			ST.PUSH_TOKEN,
+			ST.DEVICE_KEY,
+			PA.PA_ID,
+			PA.PA_NAME,
+			CH.CH_ID,
+			CH.CH_NAME
+		FROM ITUTOR_ST_DATA ST, 
+			 (SELECT ST_ID, PA_ID, GROUP_CONCAT(CH_ID SEPARATOR '|') CH_ID, GROUP_CONCAT(CH_NAME SEPARATOR ',') CH_NAME FROM ITUTOR_CH_DATA GROUP BY PA_ID,ST_ID) CH,
+			 ITUTOR_PA_DATA PA
+		WHERE ST.ST_ID = CH.ST_ID
+		AND CH.PA_ID = PA.PA_ID
+		AND ST.ST_ID = #{stId}
+	</select>
+</mapper>

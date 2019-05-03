@@ -19,10 +19,13 @@
 	 	var port = "3000";
 	 	var socket;
 	 	$(function(){
-	 		//socket network 접속
-	 		connectToServer();
+	 		var params = ${params};
+	 		console.log(params);
+	 		//connectToServer();
 	 		
-	 		//채팅방 신규인지 아닌지 체크
+	 		//1. socket network 접속 가능 여부 확인
+	 		
+	 		//2. 채팅방 신규인지 아닌지 체크
 	 		
 	 		//신규 -> 채팅방을 관리? 채팅방 ID가 필요
 	 		
