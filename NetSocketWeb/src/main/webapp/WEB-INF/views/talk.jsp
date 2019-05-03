@@ -18,15 +18,10 @@
 	 	var host = "localhost";
 	 	var port = "3000";
 	 	var socket;
+	 	var params = ${jsonParams};
 	 	$(function(){
-	 		var params = ${params};
-	 		console.log(params);
-	 		//connectToServer();
-	 		
-	 		//1. socket network 접속 가능 여부 확인
-	 		
-	 		//2. 채팅방 신규인지 아닌지 체크
-	 		
+	 		console.log(params.user_id);
+	 		connectToServer();
 	 		//신규 -> 채팅방을 관리? 채팅방 ID가 필요
 	 		
 	 		  //1> 채팅방 만들기
@@ -44,9 +39,26 @@
      		var url = "http://" + host + ":" + port;
      		console.log("socket url : "+url);
      		socket = io.connect(url,options);
-     		
+
+     		//1. socket network 접속 가능 여부 확인
      		socket.on("connect", function(){
      			println("웹 소켓 서버에 연결되었습니다. :" + url);
+     			println(socket.connected);
+     			//2. 채팅방 신규인지 아닌지 체크
+     			
+     			$.ajax({
+		        	type: "post",
+			 	    url: "/chat/talkProcessing",
+			 	    data: params,
+			 	    dataType: "json",
+			 	    success: function(data) {
+			 	    	console.log("ajax data result::"+data.result);
+			 	     },
+			 	    error: function() {
+			 	    	
+			 	    }
+			 	 });
+     			
      			
      			socket.on("message", function(message){
      				console.log(JSON.stringify(message));
@@ -90,6 +102,7 @@
 
 <!-- 라운지에서 진입시 talkChat에 lounge class만 추가해 주세요  -->
 <body class="talkChat lounge">
+
 <div id="app" class="talk">
     <header class="header">
         <a href="#" class="btn-left">

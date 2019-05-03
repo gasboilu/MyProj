@@ -6,13 +6,18 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.google.gson.Gson;
 
 import co.kr.real.app.service.ChatService;
 
 @Controller
+@RequestMapping("/chat")
 public class ChatController {
 	
 	@Autowired
@@ -25,13 +30,13 @@ public class ChatController {
 	}
 	
 	//상대사용자 목록 => 기준은 로그인한 사용자 ID를 대상으로한 관리 대상자
-	@RequestMapping(value="/chat/list")
+	@RequestMapping(value="/list")
 	public String chatList() {
 		return "chatList";
 	}
 	
 	//채팅방 목록
-	@RequestMapping(value="/chat/roomList")
+	@RequestMapping(value="/roomList")
 	public ModelAndView chatingRoomList() throws Exception{
 		ModelAndView mv = new ModelAndView();
 		HashMap<String, Object> dataMap = new HashMap<String,Object>();
@@ -49,13 +54,31 @@ public class ChatController {
 		return mv;
 	}
 	
-	@RequestMapping(value="/chat/talk")
+	@RequestMapping(value="/talk")
 	public ModelAndView talk(@RequestParam Map<String,String> params) throws Exception{
 		ModelAndView mv = new ModelAndView();
 //		Map<String,Object> map = chatService.talkRoomInInfo(params);
+		Gson gson = new Gson();
+		String strJson = gson.toJson(params, HashMap.class);
+		
 		mv.addObject("params",params);
+		mv.addObject("jsonParams",strJson);
 		mv.setViewName("talk");
 		return mv;
+	}
+	
+	
+	@RequestMapping(value="/talkProcessing")
+	@ResponseBody
+	public Map<String,Object> talkProcessing(@RequestParam Map<String,String> params) throws Exception{
+		Map<String,Object> map = new HashMap<String,Object>();
+//		Map<String,Object> map = chatService.talkRoomInInfo(params);
+		Gson gson = new Gson();
+		String strJson = gson.toJson(params, HashMap.class);
+		
+		map.put("result", "success");
+		
+		return map;
 	}
 	
 }

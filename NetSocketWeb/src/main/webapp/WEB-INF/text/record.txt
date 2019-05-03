@@ -1,3 +1,22 @@
+* 채팅접속시 히스토리 정보 구성
+1. 채팅서버에 접속시도
+2. 채팅서버 접속성공여부 확인 체크
+3. 접속성공시에 채팅방여부 확인 시작
+   3-1. 채팅방에 신규,기존 여부 체크
+        - 경우에수 
+		  1> 채팅방 정보값이 넘어오지 않았을경우
+		  2> 채팅방이 기존에 있던 정보가 사라졌을경우 (오래되서 백업되었거나 없어졌을경우나 삭제되었을경우) => 만약을 위한 조치 필요
+
+   3-2. 신규일경우
+		1> 채팅방 정보 등록
+		2> 채팅방에 입장하는 대상자들 등록(자신,대상자들)
+   3-3. 기존일경우
+4. 메시지 전송 체크
+   4-1. 채팅방에 메시지 전송(자기자신포함=> 보여질때 화면 위치 중요 (오른쪽:자기자신, 왼쪽:상대방 대상자들)
+   4-2. 접속여부 확인체크 => 채팅방에 입장여부 확인하여 입장하지않은 대상자들에게 push메시지 전송 이때 타입정보가 중요함(push전송하는 방법이 서로 다르기때문에 대상자의 타입 정보가 필요함)
+        push필요한 대상자들 리스트에 push 메시지 전송
+
+
 nodejs 그룹채팅형태로 새로 서버구축
 - 몽고DB사용
 1. 컬렉션 생성
@@ -14,7 +33,8 @@ db.OLD컬렉션명.renameCollection("NEW컬렉션명") : 이름변경
    db.컬렉션명.insert(document)
    ex> db.management_roominfo.insert([
 		 {
-			"room_id" : "채팅방 ID", -> 형식 필요
+			"room_id" : "채팅방 ID", -> 형식 필요 
+			20190430ST19000001 => 20190430(날짜) + ST(보낸사람 서비스타입 ST[교사],PA[부모]) + 19(년도 뒷자리) + 000001(순번)
 			"room_name" : "채팅방 이름", -> 채팅방에 등록되는 사용자이름들을 최초기준으로, 나중에 변경가능하도록 관리해줌
 			"room_status" : "방상태 (1: 정상, 0:사용자가없어 채널 종료된상태[과거이력 -> batch를 통한 다른곳으로 정보값을 보내는것이 좋음])"
 			"from_id" : "보낸사람 ID",
@@ -22,7 +42,7 @@ db.OLD컬렉션명.renameCollection("NEW컬렉션명") : 이름변경
 			"node_id" : "노드 서버 아이디 => 채팅서버를 여러대로 돌려서 사용할수있도록 하는기능을 사용함 (node forever)",
 			"create_date" : "채팅방 생성시간",
 			"upd_date" : "마지막으로 채팅방이 업데이트된 시간",
-			"member" : [{"id":"","name":"","room_status" : "0 or 1", "room_add_date" : "초대시간", "room_enter_date" : "입장시간", "room_out_date" : "나간시간"}]
+			"member" : [{"mid":"","name":"","room_status" : "0 or 1", "room_add_date" : "초대시간", "room_enter_date" : "입장시간", "room_out_date" : "나간시간"}]
 		 }
 	   ]);
 	   db.management_msginfo.insert([
@@ -30,8 +50,33 @@ db.OLD컬렉션명.renameCollection("NEW컬렉션명") : 이름변경
 			"room_id" : "채팅방 ID", -> 형식 필요
 			"message" : "채팅방 이름",
 			"message_view" : "메시지 확인수",
-			"message_type" : "메시지 종류", -> (텍스트,파일,링크)
+			"message_type" : "메시지 종류", -> (Text: T, File : F, Link:L)
 			"message_date" : "메시지 보낸시각",
-			"member" : [{"id":"","name":"","view" : "0 or 1 확인 여부"}]
+			"member" : [{"mid":"","name":"","view" : "0 or 1 확인 여부"}]
 		  }
+	   ]);
+	   
+	   db.management_roominfo.insert([
+			{
+			  "room_id" : "20190430ST19000001",
+	          "room_name" : "고현정,신은경",
+	          "room_status" : "0",
+	          "from_id" : "17010504",
+	          "from_name" : "고현정",
+	          "node_id" : "1",
+	          "create_date" : "201904301300",
+	          "upd_date" : "201904301300",
+	          "member" : [{"mid":"17010504","name":"고현정","room_status" : "0", "room_add_date" : "201904301300", "room_enter_date" : "201904301300", "room_out_date" : "201904301300"},{"mid":"0023439767","name":"신은경","room_status" : "0", "room_add_date" : "201904301300", "room_enter_date" : "201904301300", "room_out_date" : "201904301300"}]
+			}
+		]);
+			
+		db.management_msginfo.insert([
+			  {
+				"room_id" : "20190430ST19000001",
+				"message" : "안녕하세요",
+				"message_view" : "0",
+				"message_type" : "T",
+				"message_date" : "201904301438",
+				"member" : [{"mid":"17010504","name":"고현정","view" : "1"},{"mid":"0023439767","name":"신은경","view" : "0"}]
+			  }
 	   ]);
