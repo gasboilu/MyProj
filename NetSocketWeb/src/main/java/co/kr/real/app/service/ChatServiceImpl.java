@@ -181,7 +181,7 @@ public class ChatServiceImpl implements ChatService{
 					msgInfo = setMsgInfoUpdate(2,msgInfo);
 					msgInfo.setDay(CommUtil.getDateString(msgInfo.getMessage_date(),"yyyyMMddHHmmss","yyyyMMdd"));
 					msgInfo.setMessage_day(CommUtil.getDateString(msgInfo.getMessage_date(),"yyyyMMddHHmmss"));
-					msgInfo.setMessage_date(CommUtil.getChatShowDateString(msgInfo.getMessage_date(),"yyyyMMddHHmm"));
+					msgInfo.setMessage_date(CommUtil.getChatShowTimeString(msgInfo.getMessage_date(),"yyyyMMddHHmmss"));
 					newMsgList.add(msgInfo);
 				}
 				

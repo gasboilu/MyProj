@@ -55,6 +55,29 @@ public class CommUtil {
 		}
 		return year + "년 " + month + "월 " + day + "일 " + korWeek + "요일";
 	}
+	
+	public static String getChatShowTimeString(String dateTime, String parttern) throws Exception{
+		DateFormat dateFormat = new SimpleDateFormat(parttern);
+		Date date = dateFormat.parse(dateTime);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		int hour = cal.get(Calendar.HOUR_OF_DAY);
+		int minutes = cal.get(Calendar.MINUTE);
+		String creTime = "";
+		
+		if(hour < 13) {
+			creTime += "오전" + hour;
+		} else {
+			creTime += "오후" + (hour - 12);
+		}
+		if(minutes < 10) {
+			creTime += ":0" + minutes;
+		}else {
+			creTime += ":" + minutes;
+		}
+		
+		return creTime;
+	}
 
 	public static String getChatShowDateString(String dateTime, String parttern) throws Exception{
 		DateFormat dateFormat = new SimpleDateFormat(parttern);
@@ -65,7 +88,6 @@ public class CommUtil {
 		int to_year = cal.get(Calendar.YEAR);
 		int to_month = cal.get(Calendar.MONTH)+1;
 		int to_day = cal.get(Calendar.DATE);
-		//날짜 문제 24시간으로 안나옴
 		
 		cal.setTime(date);
 //		cal.setTimeInMillis(dateTime);

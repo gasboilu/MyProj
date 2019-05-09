@@ -31,20 +31,13 @@ var deviceCont = {
     	for(var i = 0 ; i < msgList.length ; i++){
     		var msgObj = msgList[i];
     		//타임라인 체크필요
-    		var timeLine = "";
     		if(dateCheck.length == 0){
     			dateCheck = msgObj.day;
-    			timeLine += " <div class='timeline'>";
-    			timeLine += " 	<span class='date'>" + msgObj.message_day + "</span>";
-    			timeLine += " </div>";
-    			$(".talkWrap").append(timeLine);
+    			htmlCont.talkTimeLine(msgObj);
     		}else{
     			if(dateCheck != msgObj.day){
     				dateCheck = msgObj.day;
-    				timeLine += " <div class='timeline'>";
-        			timeLine += " 	<span class='date'>" + msgObj.message_day + "</span>";
-        			timeLine += " </div>";
-        			$(".talkWrap").append(timeLine);
+    				htmlCont.talkTimeLine(msgObj);
     			}
     		}
     		
@@ -104,6 +97,16 @@ var deviceCont = {
 		$('body').append(html);
 		$('#toAppFrame').remove();
 	}
+}
+
+var htmlCont = {
+    talkTimeLine : function(msgObj) {
+    	var timeLine = "";
+    	timeLine += " <div class='timeline'>";
+		timeLine += " 	<span class='date'>" + msgObj.message_day + "</span>";
+		timeLine += " </div>";
+		$(".talkWrap").append(timeLine);
+    }
 }
 
 //서버에 연결하는 함수 정의
