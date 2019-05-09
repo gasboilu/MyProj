@@ -26,6 +26,8 @@ public class Mng_RoomInfo implements Serializable{
 	
 	private String upd_date;
 	
+	private String totalRoom;
+	
 	private ArrayList<Member> member;
 
 	public String getRoom_id() {
@@ -99,6 +101,13 @@ public class Mng_RoomInfo implements Serializable{
 	public void setMember(ArrayList<Member> member) {
 		this.member = member;
 	}
-	
-	
+
+	public String getTotalRoom() {
+		return totalRoom;
+	}
+
+	public void setTotalRoom(String totalRoom) {
+		this.totalRoom = totalRoom;
+	}
+
 }

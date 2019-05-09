@@ -31,8 +31,8 @@
 	    		var chkedNm="";
 	    		$('.chkb:checked').each(function() { 
 	    			let chkData = $(this).val().split("|");
-	    			chked += chkData[0] + "|";
-	    			chkedNm += chkData[1] + "|";
+	    			chked += "|" + chkData[0];
+	    			chkedNm += "|" + chkData[1];
 	    	   	});
 	    		newChatingConnect(chked,chkedNm);
 	    	});
@@ -59,7 +59,7 @@
 	<input type="hidden" id="target_id" name="target_id" value="" />
 	<input type="hidden" id="target_name" name="target_name" value="" />
 	<input type="hidden" id="room_id" name="room_id" value="" />
-	<input type="hidden" id="service_type" name="from_type" value="ITUTOR" />
+	<input type="hidden" id="from_type" name="from_type" value="ITUTOR" />
 	<input type="hidden" id="target_type" name="target_type" value="SOTONG" />
 </form>
 <div id="targetList" class="targetList" style="background-color: white;">

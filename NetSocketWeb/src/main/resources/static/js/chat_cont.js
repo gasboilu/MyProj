@@ -10,20 +10,74 @@ var deviceCont = {
     	socket = io.connect(url,options);
     	console.log(socket);
     },
-    setRoomProcess : function(params){
+    setAjaxProcess : function(params,urlStr,callback){
     	//2. 채팅방 신규인지 아닌지 체크
 		 $.ajax({
 			type : "post",
-			url : "/chat/talkProcessing",
+			url : urlStr,
 			data : params,
 			dataType : "json",
-			success : this.resultRoomProcess,
+			success : callback,
 			error : function() {
 				//나중에 통합으로 처리 변경
 			}
 		});
     },
     resultRoomProcess : function(data){
+    	var roomInfo = data.resultData.roomInfo;
+    	var msgList = data.resultData.msgList;
+    	var dateCheck = "";
+    	
+    	for(var i = 0 ; i < msgList.length ; i++){
+    		var msgObj = msgList[i];
+    		//타임라인 체크필요
+    		var timeLine = "";
+    		if(dateCheck.length == 0){
+    			dateCheck = msgObj.day;
+    			timeLine += " <div class='timeline'>";
+    			timeLine += " 	<span class='date'>" + msgObj.message_day + "</span>";
+    			timeLine += " </div>";
+    			$(".talkWrap").append(timeLine);
+    		}else{
+    			if(dateCheck != msgObj.day){
+    				dateCheck = msgObj.day;
+    				timeLine += " <div class='timeline'>";
+        			timeLine += " 	<span class='date'>" + msgObj.message_day + "</span>";
+        			timeLine += " </div>";
+        			$(".talkWrap").append(timeLine);
+    			}
+    		}
+    		
+    		for(var j = 0; j < msgObj.member.length ; j++){
+    			var memObj = msgObj.member[j];
+    			var strHtml = "";
+    			//자기자신쪽 메시지
+    			if(memObj.mid == msgObj.from_id){
+    				strHtml = "<div class='msg-wrap cl'>";
+    				strHtml += "	 <div class='msg-bx'>";
+    				strHtml += "		<div class='msg'>" + msgObj.message + "</div>";
+    				strHtml += "		<span class='readCh'> " + msgObj.message_view + " </span>";
+    				strHtml += "		<span class='timestamp'>" + msgObj.message_date + "</span>";
+    				strHtml += "	</div>";
+    				strHtml += "</div>";
+        		}else{//상대방쪽 메시지
+        			strHtml = "<div class='msg-wrap sv'>";
+        			strHtml += "	<div class='visual'>";
+        			strHtml += "		<img src='/img/chat/mom_1.png' alt='' />";
+        			strHtml += "	</div>";
+        			strHtml += "	<div class='msg-bx'>";
+        			strHtml += "		<span class='name'>" + msgObj.from_name + "</span>";
+        			strHtml += "		<div class='msg'>" + msgObj.message + "</div>";
+        			strHtml += "		<span class='timestamp'>" + msgObj.message_date + "</span>";
+        			strHtml += "	</div>";
+        			strHtml += "</div>";
+        		}
+    			
+    			$(".talkWrap").append(strHtml);
+    			break;
+    		}
+    		console.log("msg ::" + msgList[i].message);
+    	}
     	console.log("ajax data result::" + data.result);
     },
     getDeviceCheck : function(){
@@ -61,7 +115,7 @@ function connectToServer(params){
 		println("웹 소켓 서버에 연결되었습니다. : " + " http://" + host + ":" + port);
 		println(socket.connected);
 		//접속성공시에 채팅방여부 확인 시작
-		deviceCont.setRoomProcess(params);
+		deviceCont.setAjaxProcess(params,"/chat/talkProcessing",deviceCont.resultRoomProcess);
 		
 		socket.on("message", function(message){
 			console.log(JSON.stringify(message));

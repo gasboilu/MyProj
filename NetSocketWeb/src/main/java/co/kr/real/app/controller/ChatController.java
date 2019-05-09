@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -49,7 +49,7 @@ public class ChatController {
 		mv.addObject("chatList",chatList);
 		mv.addObject("chatInfo",dataMap);
 		//채팅방 리스트
-		mv.addObject("roomList", chatService.getRoomList());
+		mv.addObject("roomList", chatService.getRoomList(Criteria.where("member.mid").is("17010504")));
 		mv.setViewName("roomList");
 		return mv;
 	}
@@ -73,9 +73,8 @@ public class ChatController {
 	public Map<String,Object> talkProcessing(@RequestParam Map<String,String> params) throws Exception{
 		Map<String,Object> returnMap = new HashMap<String,Object>();
 		Map<String,Object> map = chatService.talkRoomInInfo(params);
-		
 		returnMap.put("result", "success");
-		
+		returnMap.put("resultData", map);
 		return returnMap;
 	}
 	
