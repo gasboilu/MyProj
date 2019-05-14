@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Controller;
@@ -37,10 +39,13 @@ public class ChatController {
 	
 	//채팅방 목록
 	@RequestMapping(value="/roomList")
-	public ModelAndView chatingRoomList() throws Exception{
+	public ModelAndView chatingRoomList(@RequestParam Map<String,String> params,HttpSession session) throws Exception{
 		ModelAndView mv = new ModelAndView();
 		HashMap<String, Object> dataMap = new HashMap<String,Object>();
-		dataMap.put("stId", "17010504");
+		String stId = params.get("stId");
+		if(stId == null)stId = "17010504";
+		session.setAttribute("userId", stId);
+		dataMap.put("stId", stId);
 		//채팅대상리스트
 		ArrayList<HashMap<String,Object>> chatList = chatService.getChatList(dataMap);
 		for(HashMap<String,Object> map : chatList) {
