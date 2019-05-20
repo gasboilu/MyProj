@@ -16,12 +16,15 @@
    4-2. 접속여부 확인체크 => 채팅방에 입장여부 확인하여 입장하지않은 대상자들에게 push메시지 전송 이때 타입정보가 중요함(push전송하는 방법이 서로 다르기때문에 대상자의 타입 정보가 필요함)
         push필요한 대상자들 리스트에 push 메시지 전송
 
-
 nodejs 그룹채팅형태로 새로 서버구축
 - 몽고DB사용
 1. 컬렉션 생성
 db.createCollection("management_roominfo", {capped:true, size:6000000, max:10000});
 db.createCollection("management_msginfo", {capped:true, size:10000000, max:10000});
+capped:true => 삭제, 이유:수정,삭제 불가
+db.createCollection("management_roominfo", {size:6000000, max:10000});
+db.createCollection("management_msginfo", {size:10000000, max:10000});
+
 - 컬렉션 조회 리스트
 show collections
 - 컬렉션 제거
@@ -48,7 +51,8 @@ db.OLD컬렉션명.renameCollection("NEW컬렉션명") : 이름변경
 	   db.management_msginfo.insert([
 		  {
 			"room_id" : "채팅방 ID", -> 형식 필요
-			"message" : "채팅방 이름",
+			"from_id" : "보낸사람 ID",
+			"message" : "채팅방 메시지",
 			"message_view" : "메시지 확인수",
 			"message_type" : "메시지 종류", -> (Text: T, File : F, Link:L)
 			"message_date" : "메시지 보낸시각",
@@ -56,46 +60,82 @@ db.OLD컬렉션명.renameCollection("NEW컬렉션명") : 이름변경
 		  }
 	   ]);
 	   
-	   db.management_roominfo.insert([
-			{
-			  "room_id" : "20190430ST19000001",
-	          "room_name" : "고현정,신은경",
-	          "room_status" : "0",
-	          "from_id" : "17010504",
-	          "from_name" : "고현정",
-	          "node_id" : "1",
-	          "create_date" : "201904301300",
-	          "upd_date" : "201904301300",
-	          "member" : [{"mid":"17010504","name":"고현정","room_status" : "0", "room_add_date" : "201904301300", "room_enter_date" : "201904301300", "room_out_date" : "201904301300"},{"mid":"0023439767","name":"신은경","room_status" : "0", "room_add_date" : "201904301300", "room_enter_date" : "201904301300", "room_out_date" : "201904301300"}]
-			}
-		]);
-			
-		db.management_msginfo.insert([
-			  {
-				"room_id" : "20190430ST19000001",
-				"message" : "안녕하세요",
-				"message_view" : "0",
-				"message_type" : "T",
-				"message_date" : "201904301438",
-				"member" : [{"mid":"17010504","name":"고현정","view" : "1"},{"mid":"0023439767","name":"신은경","view" : "0"}]
-			  }
+db.management_roominfo.insert([
+		{
+		  "room_id" : "20190430ST19000001",
+          "room_name" : "고현정,신은경",
+          "room_status" : "0",
+          "from_id" : "17010504",
+          "from_name" : "고현정",
+          "node_id" : "1",
+          "create_date" : "201904301300",
+          "upd_date" : "201904301300",
+          "member" : [{"mid":"17010504","name":"고현정","room_status" : "0", "room_add_date" : "201904301300", "room_enter_date" : "201904301300", "room_out_date" : "201904301300"},{"mid":"0023439767","name":"신은경","room_status" : "0", "room_add_date" : "201904301300", "room_enter_date" : "201904301300", "room_out_date" : "201904301300"}]
+		}
+	]);
+	
+	
+db.management_msginfo.insert([
+		  {
+			"room_id" : "20190430ST19000001",
+			"from_id" : "17010504",
+			"message" : "안녕하세요",
+			"message_view" : "0",
+			"message_type" : "T",
+			"message_date" : "201904301438",
+			"member" : [{"mid":"17010504","name":"고현정","view" : "1"},{"mid":"0023439767","name":"신은경","view" : "0"}]
+		  }
 	   ]);
+	   
+
+1. 로컬 신규 테이블 생성
+- itutor_st_data,itutor_pa_data,itutor_ch_data
+
+CREATE TABLE `itutor_st_data` (
+`st_key` INT(11) NOT NULL AUTO_INCREMENT,
+`st_id` VARCHAR(20) NULL DEFAULT NULL,
+`st_name` VARCHAR(30) NULL DEFAULT NULL,
+`st_type` VARCHAR(20) NULL DEFAULT NULL,
+`st_typename` VARCHAR(20) NULL DEFAULT NULL,
+`push_token` VARCHAR(50) NULL DEFAULT NULL,
+`device_key` VARCHAR(160) NULL DEFAULT NULL,
+PRIMARY KEY (`st_key`),
+INDEX `INDEX_ITUTOR_ST_01` (`st_id`),
+INDEX `INDEX_ITUTOR_ST_02` (`st_name`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
 
 
+CREATE TABLE `itutor_pa_data` (
+	`pa_key` INT(11) NOT NULL AUTO_INCREMENT,
+	`pa_id` VARCHAR(20) NULL DEFAULT NULL,
+	`pa_name` VARCHAR(30) NULL DEFAULT NULL,
+	PRIMARY KEY (`pa_key`),
+	INDEX `INDEX_ITUTOR_PA_01` (`pa_id`),
+	INDEX `INDEX_ITUTOR_PA_02` (`pa_name`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
 
-1. 채팅서버에 접속시도
-2. 채팅서버 접속성공여부 확인 체크
-3. 접속성공시에 채팅방여부 확인 시작
-   3-1. 채팅방에 신규,기존 여부 체크
-        - 경우에수 
-		  1> 채팅방 정보값이 넘어오지 않았을경우
-		  2> 채팅방이 기존에 있던 정보가 사라졌을경우 (오래되서 백업되었거나 없어졌을경우나 삭제되었을경우) => 만약을 위한 조치 필요
 
-   3-2. 신규일경우
-		1> 채팅방 정보 등록
-		2> 채팅방에 입장하는 대상자들 등록(자신,대상자들)
-   3-3. 기존일경우
-4. 메시지 전송 체크
-   4-1. 채팅방에 메시지 전송(자기자신포함=> 보여질때 화면 위치 중요 (오른쪽:자기자신, 왼쪽:상대방 대상자들)
-   4-2. 접속여부 확인체크 => 채팅방에 입장여부 확인하여 입장하지않은 대상자들에게 push메시지 전송 이때 타입정보가 중요함(push전송하는 방법이 서로 다르기때문에 대상자의 타입 정보가 필요함)
-        push필요한 대상자들 리스트에 push 메시지 전송
+CREATE TABLE `itutor_ch_data` (
+	`ch_key` INT(11) NOT NULL AUTO_INCREMENT,
+	`ch_id` VARCHAR(20) NULL DEFAULT NULL,
+	`ch_name` VARCHAR(30) NULL DEFAULT NULL,
+	`pa_id` VARCHAR(20) NULL DEFAULT NULL,
+	`st_id` VARCHAR(20) NULL DEFAULT NULL,
+	PRIMARY KEY (`ch_key`),
+	INDEX `INDEX_ITUTOR_CH_01` (`ch_id`),
+	INDEX `INDEX_ITUTOR_CH_02` (`ch_name`),
+	INDEX `INDEX_ITUTOR_CH_03` (`pa_id`),
+	INDEX `INDEX_ITUTOR_CH_04` (`st_id`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
